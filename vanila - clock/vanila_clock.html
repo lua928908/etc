@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		#wrap { position: relative; margin: 50px auto; max-width: 600px; height: 600px; border: 1px solid #000; }
+		.clock { position: absolute; top: 50%; left: 50%; width: 300px; height: 300px; border: 1px solid greenyellow; border-radius: 50%; transform: translate(-50%,-50%); }
+		.clock .inner { position: relative; display: inline-block; width: 100%; height: 100%; }
+		.clock .time { position: absolute; top: 50%; left: 50%; display: inline-block; width: 7px; border-radius: 3px;
+			transform-origin: top left;
+		}
+		.clock .hour { height: 15%; background-color: black; z-index: 10;;
+			transform: rotate(-180deg);
+		}
+		.clock .minit { height: 30%; background-color: rgb(188, 228, 150); z-index: 5;
+			transform: rotate(-180deg);
+		}
+		.clock .second { width: 2px; height: 45%; background-color: red; z-index: 1;
+			transform: rotate(-180deg);
+		}
+		.info { position: absolute; left: 0; bottom: 15px; width: 100%; text-align: center; font-size: 16px; color: darkkhaki;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="wrap">
+		<div class="clock">
+			<div class="inner">
+				<div class="hour time" data-hour="0" data-rotate="-180" data-count="0"></div>
+				<div class="minit time" data-minit="0" data-rotate="-180" data-count="0"></div>
+				<div class="second time" data-second="0" data-rotate="-180" data-count="0"></div>
+			</div>
+		</div>
+
+		<div class="info">
+			<span class="info_hour">0</span>시
+			<span class="info_minit">0</span>분
+			<span class="info_second">0</span>초
+		</div>
+	</div>
+
+	<script>
+		const time = new Date();
+		const current_hour_rotate = time.getHours() * 30 - 180;
+		const current_minit_rotate = time.getMinutes() * 6 - 180;
+		const current_second_rotate = time.getSeconds() * 6 - 180;
+		const hour = document.querySelector('.hour');
+		const minit = document.querySelector('.minit');
+		const second = document.querySelector('.second');
+		const info_hour = document.querySelector('.info_hour');
+		const info_minit = document.querySelector('.info_minit');
+		const info_second = document.querySelector('.info_second');
+
+		// 카운트 갯수
+		hour.dataset.count = time.getHours();
+		minit.dataset.count = time.getMinutes();
+		second.dataset.count = time.getSeconds()
+		// 초기각도
+		hour.style.transform = `rotate(${current_hour_rotate}deg)`;
+		minit.style.transform = `rotate(${current_minit_rotate}deg)`;
+		second.style.transform = `rotate(${current_second_rotate}deg)`;
+		// 현재각도와 dataset 각도 동기화
+		hour.dataset.rotate = current_hour_rotate;
+		minit.dataset.rotate = current_minit_rotate;
+		second.dataset.rotate = current_second_rotate;
+		// 현재시간 텍스트 표현
+		info_hour.textContent = hour.dataset.count;
+		info_minit.textContent = minit.dataset.count;
+		info_second.textContent = second.dataset.count;
+		
+
+		function flow_hour(target){
+			let current = parseInt( target.dataset.rotate );
+			let next = parseInt( current + 6 );
+			target.dataset.rotate = next;
+			target.dataset.count = parseInt( target.dataset.count ) + 1;
+			if( target.dataset.count >= 60 ){
+				target.dataset.count = 0;
+			}
+			info_hour.textContent = target.dataset.count;
+			return target.style.transform = `rotate(${next}deg)`
+		}
+		function flow_minit(target){
+			let current = parseInt( target.dataset.rotate );
+			let next = parseInt( current + 6 );
+			target.dataset.rotate = next;
+			target.dataset.count = parseInt( target.dataset.count ) + 1;
+			if( target.dataset.count >= 60 ){
+				target.dataset.count = 0;
+				flow_hour(hour);
+			}
+			info_minit.textContent = target.dataset.count;
+			return target.style.transform = `rotate(${next}deg)`
+		}
+		function flow_second(target){
+			let current = parseInt( target.dataset.rotate );
+			let next = parseInt( current + 6 );
+			target.dataset.rotate = next;
+			target.dataset.count = parseInt(target.dataset.count) + 1;
+			if( target.dataset.count >= 60 ){
+				target.dataset.count = 0;
+				flow_minit(minit);
+			}
+			info_second.textContent = target.dataset.count;
+			return target.style.transform = `rotate(${next}deg)`
+		}
+
+		setInterval(()=>{
+			flow_second(second);
+		}, 1000);
+	</script>
+</body>
+</html>
