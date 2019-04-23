@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    #setting { margin: 50px 15px 0; }
+    #setting input { display: inline-block; margin-top: 15px; width: 100%; }
+    #setting p { margin-top: 10px; }
+    #exec { display: block; margin-top: 40px; width: 100%; }
+    table { margin-top: 40px; width: 100%; border-collapse: collapse; }
+    td { width: 25px; height: 25px; border: 1px solid black; text-align: center; background-color: #444; }
+    td.opened { background-color: #fff; }
+  </style>
+</head>
+<body>
+
+<div id="setting">
+  <input id="hor" type="text" placeholder="가로" value="10">
+  <input id="ver" type="text" placeholder="세로" value="10">
+  <input id="mine" type="text" placeholder="지뢰" value="2">
+  <button id="exec">실행</button>
+</div>
+
+<table>
+  <tbody>
+    <tr>
+      <td><span id="timer">0</span>초</td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  const hor = parseInt( document.querySelector('#hor').value );
+  const ver = parseInt( document.querySelector('#ver').value );
+  const mine = parseInt( document.querySelector('#mine').value );
+  const tbody = document.querySelector('tbody');
+  let dataset = [];
+
+  document.querySelector('#exec').addEventListener('click', ()=>{
+    tbody.innerHTML = '';
+    dataset = [];
+    for(var i=0; i<10; i++){
+      dataset[i] = [];
+      for(var j=0; j<10; j++){
+        dataset[i][j] = 1;
+      }
+    }
+
+    // 지뢰 위치 뽑기
+    const list = Array(hor * ver)
+      .fill()
+      .map((value, index)=>{
+        return index;
+      });
+
+    const shuffle = [];
+    while(list.length > 100 - mine){
+      let select_number = list.splice(Math.random() * list.length, 1)[0];
+      shuffle.push(select_number);
+    }
+    console.log('셔플=',shuffle);
+
+    // 테이블 만들기
+    for(let i=0; i<ver; i++){
+      let arr = [];
+      let tr = document.createElement('tr');
+      for(let j=0; j<hor; j++){
+        let td = document.createElement('td');
+        td.addEventListener('contextmenu', (e)=>{
+          e.preventDefault();
+          let parent_tr = e.currentTarget.parentNode;
+          let parent_tbody = e.currentTarget.parentNode.parentNode;
+          let parent_tr_index = Array.prototype.indexOf.call(parent_tr.children, e.currentTarget);
+          let parent_tbody_index = Array.prototype.indexOf.call(parent_tbody.children, parent_tr);
+          if( e.currentTarget.textContent == '' || e.currentTarget.textContent == 'X' ){
+            e.currentTarget.textContent = '!';
+          } else if( e.currentTarget.textContent == '!' ){
+            e.currentTarget.textContent = '?';
+          }else if( e.currentTarget.textContent == '?' ){
+            if(dataset[parent_tbody_index][parent_tr_index] == '1'){
+              e.currentTarget.textContent = '';
+            } else if (dataset[parent_tbody_index][parent_tr_index] == 'X'){
+              e.currentTarget.textContent = 'X';
+            }
+            // e.currentTarget.textContent = '';
+            // dataset[parent_tbody_index][parent_tr_index] = '1';
+          }
+        })
+        td.addEventListener('click', (e)=>{
+          // 클릭 주변지뢰 갯수
+          let parent_tr = e.currentTarget.parentNode;
+          let parent_tbody = e.currentTarget.parentNode.parentNode;
+          let parent_tr_index = Array.prototype.indexOf.call(parent_tr.children, e.currentTarget);
+          let parent_tbody_index = Array.prototype.indexOf.call(parent_tbody.children, parent_tr);
+
+          e.currentTarget.classList.add('opened');
+          if( dataset[parent_tbody_index][parent_tr_index] == 'X' ){
+            e.currentTarget.textContent = '펑';
+          }else{
+            let field = [
+              dataset[parent_tbody_index][parent_tr_index-1],dataset[parent_tbody_index][parent_tr_index+1]
+            ];
+            if( dataset[parent_tbody_index-1] ){
+              field = field.concat([parent_tbody_index-1][parent_tr_index-1], dataset[parent_tbody_index-1][parent_tr_index], dataset[parent_tbody_index-1][parent_tr_index+1]);
+            }else if( dataset[parent_tbody_index+1] ){
+              field = field.concat(dataset[parent_tbody_index+1][parent_tr_index-1], dataset[parent_tbody_index+1][parent_tr_index], dataset[parent_tbody_index+1][parent_tr_index+1]);
+            }
+            let field_mine_number = field.filter((v)=>{
+              return v === 'X'
+            }).length;
+            e.currentTarget.textContent = field_mine_number;
+            if(field_mine_number == 0){
+              // 주변 8칸 동시 오픈 (재귀)
+              
+            }
+          }
+        });
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    // 지뢰 심기
+    for(let k=0; k<shuffle.length; k++ ){
+      let vertical = Math.floor(shuffle[k] / 10);
+      let horizontal = shuffle[k] % 10;
+      tbody.children[vertical].children[horizontal].textContent = 'X';
+      dataset[vertical][horizontal] = 'X';
+    }
+
+    console.log('최종 데이터 = ',dataset);
+  });
+
+  function self_func(number){
+    console.log(number);
+    if(number < 5){
+      self_func(number + 1);
+    }
+  }
+  self_func(1);
+</script>
+</body>
+</html>

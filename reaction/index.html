@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #wrap { margin: 100px auto; width: 500px; height: 200px; }
+    #screen {  text-align: center; line-height: 200px; }
+    #screen.waiting { color: #fff; background-color: black; }
+    #screen.ready { color: #fff; background-color: rgb(149, 190, 165); }
+    #screen.now { color: #fff; background-color: red; }
+    .txt { margin-top: 15px; text-align: center; }
+    .txt .value { display: inline-block; margin: 0 5px; color: red; }
+  </style>
+</head>
+<body>
+
+  <div id="wrap">
+      <div id="screen" class="waiting">클릭해서 시작하세요.</div>
+      <div class="txt">평균<span class="value">0</span>초 입니다.</div>
+  </div>
+
+  <script>
+    const screen = document.querySelector('#screen');
+    const txt = document.querySelector('.txt');
+    let start_time;
+    let end_time;
+    const archive = [];
+    let count = 0;
+    let timeout;
+
+    screen.addEventListener('click', ()=>{
+      if( screen.classList.contains('waiting') ){
+        screen.classList.replace('waiting','ready');
+        screen.textContent = '빨간색이 되면 클릭하세요.';
+        timeout = setTimeout(()=>{
+          start_time = new Date();
+          screen.click();
+        }, Math.floor( (Math.random() * 1000) + 2000))
+      } else if( screen.classList.contains('ready') ){
+        if(!start_time){
+          clearTimeout(timeout);
+          screen.classList.replace('ready','waiting');
+          screen.textContent = '너무 빨리 누르셨습니다!';
+        }else{
+          screen.classList.replace('ready','now');
+          screen.textContent = '클릭하세요!';
+        }
+      } else if( screen.classList.contains('now') ){
+        end_time = new Date();
+        console.log( `반응속도 ${(end_time - start_time) / 1000}초 }` );
+        archive.push( (end_time - start_time) / 1000);
+        screen.classList.replace('now','waiting');
+        screen.textContent = '클릭해서 시작하세요.';
+        count++;
+        let total = archive.reduce((total, current)=>{
+          return total + current;
+        },0);
+        let result = total / count;
+        txt.querySelector('.value').textContent = result.toFixed(4);
+        start_time = null;
+      }
+    });
+  </script>
+</body>
+</html>
