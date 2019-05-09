@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #wrap { margin: 100px auto; }
+    .card { display: inline-block; margin: 0 20px 20px 0; width: 70px; height: 100px; perspective: 140px; }
+    .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+    .card.flipped .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border: 1px solid black; }
+
+    .card-front { color: #fff; background-color: navy; }
+    .card-back { color: #fff; background-color: green; transform: rotateY(180deg) }
+  </style>
+</head>
+<body>
+
+  <div id="wrap">
+
+  </div>
+
+  <script>
+    const horizontal = 4;
+    const vertical = 3;
+    let colorList;
+    let colorList_shuffle = [];
+    let clickFlag = true;
+    let clickCard = [];
+    let openCard = [];
+    let startTime;
+
+    function colorSetting(){
+      colorList = ['red','red','orange','orange','green','green','yellow','yellow','white','white','pink','pink'];
+      for(let i=0; colorList.length > 0; i++){
+        colorList_shuffle = colorList_shuffle.concat( colorList.splice(Math.floor(Math.random()*colorList.length),1) );
+      }
+    }
+
+    function init(){
+      document.querySelector('#wrap').innerHTML = '';
+      openCard;
+      startTime = null;
+      cardSetting(horizontal,vertical);
+      colorSetting();
+    }
+
+    function cardSetting(hor, ver){
+      clickFlag = false;
+
+      for(let i=0; i<hor*ver; i++){
+        let card = document.createElement('div');
+        card.classList.add('card');
+        let cardInner = document.createElement('div');
+        cardInner.classList.add('card-inner');
+        let cardFront = document.createElement('div');
+        cardFront.classList.add('card-front');
+        let cardBack = document.createElement('div');
+        cardBack.classList.add('card-back');
+        cardBack.style.backgroundColor = colorList_shuffle[i];
+        cardInner.appendChild(cardFront);
+        cardInner.appendChild(cardBack);
+        card.appendChild(cardInner);
+
+        ((c)=>{
+          card.addEventListener('click',()=>{
+          if(clickFlag && !openCard.includes(c)){
+            c.classList.toggle('flipped');
+            clickCard.push(c);
+            console.log('클릭한 카드',clickCard);
+            if(clickCard.length == 2){
+              if(
+                clickCard[0].querySelector('.card-back').style.backgroundColor ==
+                clickCard[1].querySelector('.card-back').style.backgroundColor
+              ){
+                console.log('같음');
+                // 카드색이 같은경우
+                openCard.push(clickCard[0]);
+                openCard.push(clickCard[1]);
+                clickCard = [];
+                if(openCard.length === 12){
+                  const endTime = new Date();
+                  alert(` 성공!, 기록: ${(endTime - startTime)/1000} 초 `);
+
+                  init();
+                }
+              }else{
+                console.log('다름');
+                // 카드색이 다른경우
+                clickFlag = false;
+                setTimeout(()=>{
+                  clickCard[0].classList.remove('flipped');
+                  clickCard[1].classList.remove('flipped');
+                  clickFlag = true;
+                  clickCard = [];
+                }, 500);
+              }
+            }
+          }
+          });
+        })(card);
+
+        document.querySelector('#wrap').appendChild(card);
+      }
+
+      document.querySelectorAll('.card').forEach((card, index)=>{
+        // 처음 다보여줌
+        setTimeout(()=>{
+          card.classList.add('flipped');
+        }, 1000 + 100 * index);
+
+        // 닫기, 10초
+        setTimeout(()=>{
+          card.classList.remove('flipped');
+          clickFlag = true;
+          startTime = new Date();
+        }, 10000);
+      });
+      
+    };
+    
+    colorSetting();
+    cardSetting(horizontal,vertical);
+  </script>
+</body>
+</html>
