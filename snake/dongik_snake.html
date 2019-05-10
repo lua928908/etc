@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>SNAKE</title>
+	<link rel="stylesheet" href="css/normalize.css">
+	<link href="https://fonts.googleapis.com/css?family=Nanum+Gothic" rel="stylesheet">
+	<style>
+		body { font-family: 'Nanum Gothic', sans-serif; }
+		p { margin: 0; padding: 0; }
+		.wrap { margin: 0 auto; max-width: 1200px; }
+		form { padding: 25px 0; text-align: center; border: 1px solid #000; }
+		form .txt { margin-bottom: 15px; }
+		#table { margin: 50px 30px 0; border-collapse: collapse; }
+		#table tr {  }
+		#table tr td { width: 20px; height: 20px; border: 1px solid gray; }
+		#table tr td.block { background-color: gray; }
+		#table tr td.item { background-color: red; }
+		#table tr td.snake { background-color: black; }
+		#table tr td.first { background-color: blue; }
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+	<form action="">
+		<p class="txt">
+			MAP 의 크기를 지정해 주세요.<br>
+			Ex) X: 20   Y: 20
+		</p>
+		X : <input id="user_x" type="text" value="20">
+		Y : <input id="user_y" type="text" value="20">
+		<button id="confirm">확인</button>
+	</form>
+
+	<table id="table">
+	</table>
+</div>
+
+
+<script>
+	jQuery(function(){
+
+		var user_x;
+		var user_y;
+		var table = jQuery('#table');
+		var snake = [
+			{ x: 0, y: 0, pos: 37 },
+			{ x: 0, y: 0, pos: 37 },
+			{ x: 0, y: 0, pos: 37 }
+		];
+		var rate = 3000;
+		var current_time = 0;
+		var next_time = 0;
+		var state;
+		var key_code = {
+			left : 37,
+			up : 38,
+			right : 39,
+			down : 40
+		}
+
+		jQuery('#confirm').on('click',function(e){
+			e.preventDefault();
+			user_x = jQuery('#user_x').val();
+			user_y = jQuery('#user_y').val();
+
+			init();
+			make_table(user_x,user_y);
+			make_item(user_x,user_y);
+			make_snake();
+			render();
+		});
+
+		function init(){
+			snake = [
+				{ x: 0, y: 0, pos: 37 },
+				{ x: 0, y: 0, pos: 37 },
+				{ x: 0, y: 0, pos: 37 }
+			]
+			table.empty();
+		};
+
+		// 맵 생성
+		 function make_table(x,y){
+		 	for( var i=0; i<y; i++ ){
+		 		var tile = jQuery('<tr></tr>').appendTo(table);
+		 		for( var j=0; j<x; j++ ){
+		 			if( j==0 || i==0 ){
+		 				tile.append('<td class="block"></td>');
+		 				continue;
+		 			}else if( j==y-1 || i==x-1 ){
+		 				tile.append('<td class="block"></td>');
+		 				continue;
+		 			}else{
+		 				tile.append('<td></td>');
+		 				continue;
+		 			}
+		 		};
+		 	};
+		 };
+
+		 // 아이템 생성
+		 function make_item(x,y){
+		 	var random_x = parseInt( Math.random()*x );
+		 	var random_y = parseInt( Math.random()*y );
+		 	var target = table.find('tr').eq(random_y).find('td').eq(random_x);
+		 	if( target.hasClass('block') || target.hasClass('snake') ){
+		 		console.log('OOPS');
+		 		make_item(user_x,user_y);
+		 	}else{
+		 		target.addClass('item');
+		 	};
+		 };
+
+		 // 최초의 스네이크 생성
+		 function make_snake(){
+		 	for( var i=0; i<snake.length; i++ ){
+		 		snake[i].x = parseInt( user_x/2 );
+		 		snake[i].y = parseInt( user_y/2 );
+		 		var center_point = jQuery('#table').find('tr').eq( parseInt(user_y/2) ).find('td').eq( parseInt(user_x/2) );
+
+		 		if( i===0 ){
+		 			center_point.addClass('snake first');
+		 		}else{
+		 			center_point.addClass('snake');
+		 		}
+		 	}
+		 };
+
+		 // 랜더링 - 화면출력
+		 function render(){
+		 	var action_render = setInterval(function(){
+		 		var time = new Date();
+		 		current_time = time.getTime();
+
+		 		if( current_time > next_time ){
+		 			next_time = current_time + rate;
+
+		 			// 이동
+		 			for( var i=0; i<snake.length; ++i ){
+		 				var mx = 0;
+		 				var my = 0;
+		 				var current_tile = get_tile( snake[i].x , snake[i].y );
+		 				var next_tile;
+
+		 				// 방향
+		 				if( current_tile.attr('data-pos') ){
+		 					/*
+		 					키 이벤트가 발생하면 first요소에 data-pos로 이벤트 keyCode가 들어가게되고 (37,38,39,40)
+		 					keyCode값을 각각의 snake의 pos에 삽입하여 switch문이 동작하며 랜더할때 next_tile을 선정하는데에 영향을준다
+		 					*/
+		 					snake[i].pos = parseInt(current_tile.attr('data-pos')); // 첫번째만 값이 들어가지 않음? 어떻게 2~3번째 몸통도 pos값을 받는지? 어캐 방향값을 받는지모르겠음
+		 				}
+		 				if(i === snake.length-1 && current_tile.attr("data-pos")) {
+		 					console.log( '마지막 i의 pos = ' +  current_tile.attr('data-pos') );
+		 				  current_tile.removeAttr("data-pos");
+		 				};
+
+		 				switch( snake[i].pos ){
+		 					case key_code.left : { mx = -1; } break;
+		 					case key_code.up : { my = -1; } break;
+		 					case key_code.right : { mx = 1; } break;
+		 					case key_code.down : { my = 1; } break;
+		 				}
+
+		 				// 위치
+		 				next_tile = get_tile( snake[i].x+(mx) , snake[i].y+(my) );
+		 				if( next_tile.hasClass('snake') ){
+		 					get_tile(snake[i].x, snake[i].y).addClass('snake');
+		 				}else{
+		 					if( i===0 ){
+		 						next_tile.addClass('snake first');
+		 					}else{
+		 						next_tile.addClass('snake');
+		 					}
+		 					// 이전 snake 몸통 삭제
+		 					remove_tile(parseInt(snake[i].x) , parseInt(snake[i].y));
+
+		 					// 다시 새값으로 갱신
+		 					snake[i].x = snake[i].x + (mx);
+		 					snake[i].y = snake[i].y + (my);
+		 				}
+		 				// 아이템 먹을때
+		 				if( next_tile.hasClass('item') ){
+		 					reset_item();
+		 					make_item(user_x,user_y);
+		 					add_tile();
+		 				}
+		 			}
+		 			state = snake[0].pos;
+		 		}
+		 	},10);
+
+		 };
+
+		 function get_tile(x,y){
+		 	return table.find('tr').eq(y).find('td').eq(x);
+		 };
+		 function next_tile(){
+		 	var first_snake = snake[0];
+		 	switch( first_snake.pos ){
+		 		case key_code.left   : { return get_tile( first_snake.x-1, first_snake.y); } break;
+		 		case key_code.right  : { return get_tile( first_snake.x+1, first_snake.y); } break;
+		 		case key_code.top    : { return get_tile( first_snake.x, first_snake.y-1); } break;
+		 		case key_code.bottom : { return get_tile( first_snake.x, first_snake.y+1); } break;
+		 	}
+		 };
+		 function remove_tile(x,y){
+		 	get_tile(x,y).removeClass();
+		 };
+
+		 function add_tile(){
+		 	var last_snake = snake[snake.length-1];
+		 	console.log( last_snake );
+
+		 	rate = rate - 15;
+		 	console.log( '라스트 아이템 pos = ' + last_snake.pos );
+		 	table.find('tr').eq(last_snake.y).find('td').eq(last_snake.x).css({'background-color':'yellow'});
+		 	switch( last_snake.pos ){
+		 		case key_code.left : { snake.push({ "x" : last_snake.x - 1, "y" : last_snake.y, "pos" : 37 }); } break;
+		 		case key_code.up : { snake.push({ "x" : last_snake.x, "y" : last_snake.y - 1, "pos" : 38 }); } break;
+		 		case key_code.right : { snake.push({ "x" : last_snake.x + 1, "y" : last_snake.y, "pos" : 39 }); } break;
+		 		case key_code.down : { snake.push({ "x" : last_snake.x, "y" : last_snake.y + 1, "pos" : 40 }); } break;
+		 	}
+		 }
+
+		 function reset_item(){
+		 	table.find('td').removeClass('item');
+		 }
+
+		 function render_stop(){
+		 	clearInterval(action_render);
+		 }
+
+		 // 방향키 이벤트
+		 jQuery(window).on('keyup', function(e){
+		 	var press_key = e.keyCode;
+
+		 	if(
+		 		press_key == 37 && state == 39 ||
+		 		press_key == 38 && state == 40 ||
+		 		press_key == 39 && state == 37 ||
+		 		press_key == 40 && state == 38
+		 	){
+		 		return;
+		 	}
+		 	if(!(
+		 		press_key == 37 ||
+		 		press_key == 38 ||
+		 		press_key == 39 ||
+		 		press_key == 40
+		 	)){
+		 		return;
+		 	}else{
+		 		get_tile( snake[0].x, snake[0].y ).attr('data-pos',press_key);
+		 		snake[0].pos = press_key;
+		 	}
+		 });
+
+	});
+</script>
+</body>
+</html>

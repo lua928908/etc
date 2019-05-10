@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Todo List - JS</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
+	<style>
+		* { -webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		box-sizing: border-box; }
+		ul,dl,ol { margin: 0; padding: 0; }
+		li { list-style: none; }
+
+		#wrap { margin: 100px auto 0; max-width: 960px; }
+		#wrap .input-wrap { padding: 20px 45px; background-color: #000; }
+		#wrap .input-wrap .title {  color: #fff; text-align: center; }
+		#wrap .input-wrap .add-list { position: relative; }
+		#wrap .input-wrap .add-list input { padding: 0 20px; max-width: 768px; width: 100%; height: 50px; border: 1px solid #fff; }
+		#wrap .input-wrap .add-list button { position: absolute; top: 0; right: 0; width: 70px; height: 50px; background-color: transparent; border: 0; cursor: pointer; }
+		#wrap .output-wrap {  }
+		#wrap .output-wrap .show-list {  }
+		#wrap .output-wrap .show-list  #todo-list {  }
+		#wrap .output-wrap .show-list  #todo-list li { position: relative; padding: 15px 15px 15px 45px; cursor: pointer;
+			transition: background-color 0.3s;
+		}
+		#wrap .output-wrap .show-list  #todo-list li:nth-child(even) { background-color: #eee; }
+		#wrap .output-wrap .show-list  #todo-list li button { position: absolute; top: 50%; right: 0; padding: 0; width: 85px; height: 50px; text-align: center; line-height: 50px; background-color: transparent; border: 0; cursor: pointer;
+			transition: background-color 0.3s, color 0.3s;
+			transform: translate(0,-50%);
+		}
+		#wrap .output-wrap .show-list  #todo-list li.check { color: #fff; background-color: #888; text-decoration: line-through; }
+		#wrap .output-wrap .show-list  #todo-list li.check:after { content: ''; position: absolute; top: 10px; left: 16px; width: 7px; height: 15px; border-color: #fff; border-style: solid; border-width: 0 2px 2px 0;
+			transform: rotate(45deg);
+		}
+		@media all and (min-width: 102px){
+			#wrap .output-wrap .show-list  #todo-list li:hover { background-color: #ddd; }
+			#wrap .output-wrap .show-list  #todo-list li button:hover { background-color: #f44336; color: #fff; }
+		}
+	</style>
+</head>
+<body>
+<main id="wrap">
+	<div class="input-wrap">
+		<h1 class="title">My To Do List</h1>
+		<div class="add-list">
+			<input id="add-input" type="text" placeholder="해야할 일을 입력하세요.">
+			<button id="add-btn" type="submit">확인</button>
+		</div>
+	</div>
+	<div class="output-wrap">
+		<div class="show-list">
+			<ul id="todo-list">
+				<li>아이템 01<button class="remove">×</button></li>
+				<li>아이템 02<button class="remove">×</button></li>
+				<li>아이템 03<button class="remove">×</button></li>
+				<li>아이템 04<button class="remove">×</button></li>
+			</ul>
+		</div>
+	</div>
+</main>
+
+<script>
+	// 글로벌 변수선언
+	var add_input = document.querySelector('#add-input');
+	var add_btn = document.querySelector('#add-btn');
+	var todo_list = document.querySelector('#todo-list');
+	var todo_item_arr = document.querySelectorAll('#todo-list li')
+	var remove_arr = document.querySelectorAll('#todo-list .remove');
+
+
+
+	//함수정의
+	var toggle = function(){
+		this.classList.toggle('check');
+	};
+	var remove = function(target){
+		this.parentElement.remove()
+	};
+	var add_item = function(target,text){
+		var create_item = document.createElement('li');
+		var create_btn = document.createElement('button');
+
+		create_item.textContent = text;
+		create_item.addEventListener('click', toggle);
+		create_btn.textContent = '×';
+		create_btn.addEventListener('click', remove);
+		create_item.append(create_btn);
+		target.append(create_item);
+	};
+
+
+
+
+	// 이벤트등록
+	add_btn.addEventListener('click', function(){
+		var add_input_value = add_input.value;
+		add_item(todo_list,add_input_value);
+		add_input.value = '';
+	});
+	add_input.addEventListener('keyup', function(e){
+		var add_input_text = this.textContent;
+		var keycode = e.keyCode;
+
+		if( keycode === 13 ){
+			var add_input_value = add_input.value;
+			add_item(todo_list,add_input_value);
+			this.value = '';
+		}else{
+			return;
+		}
+	});
+
+
+
+
+	// 기존 아이템에 이벤트부여
+	for( var i=0; i<todo_item_arr.length; i++ ){
+		todo_item_arr[i].addEventListener('click', toggle);
+		todo_item_arr[i].querySelector('button').addEventListener('click', remove);
+	}
+</script>
+</body>
+</html>

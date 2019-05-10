@@ -35,24 +35,28 @@
     function colorSetting(){
       colorList = ['red','red','orange','orange','green','green','yellow','yellow','white','white','pink','pink'];
       for(let i=0; colorList.length > 0; i++){
-        colorList_shuffle = colorList_shuffle.concat( colorList.splice(Math.floor(Math.random()*colorList.length),1) );
+        colorList_shuffle = colorList_shuffle.concat( colorList.splice(Math.floor(Math.random()*colorList.length),1) ).slice(); ;
       }
+      console.log('컬러', colorList_shuffle);
     }
 
     function init(){
       document.querySelector('#wrap').innerHTML = '';
-      openCard;
+      colorList_shuffle = [];
+      clickFlag = [];
+      clickCard = [];
+      openCard = [];
       startTime = null;
-      cardSetting(horizontal,vertical);
       colorSetting();
-    }
+      cardSetting(horizontal,vertical);
+    };
 
     function cardSetting(hor, ver){
       clickFlag = false;
 
       for(let i=0; i<hor*ver; i++){
         let card = document.createElement('div');
-        card.classList.add('card');
+        card.classList.add('card','index'+i);
         let cardInner = document.createElement('div');
         cardInner.classList.add('card-inner');
         let cardFront = document.createElement('div');
@@ -72,14 +76,19 @@
             console.log('클릭한 카드',clickCard);
             if(clickCard.length == 2){
               if(
+                // 클릭한 요소의 backgroundColor가 같으면서 클래스명은 달라야한다, 같은카드를 2번클릭하는 경우 방지.
                 clickCard[0].querySelector('.card-back').style.backgroundColor ==
                 clickCard[1].querySelector('.card-back').style.backgroundColor
+                &&
+                clickCard[0].classList !==
+                clickCard[1].classList
               ){
                 console.log('같음');
                 // 카드색이 같은경우
                 openCard.push(clickCard[0]);
                 openCard.push(clickCard[1]);
                 clickCard = [];
+                console.log('오픈카드의 랭스', openCard.length);
                 if(openCard.length === 12){
                   const endTime = new Date();
                   alert(` 성공!, 기록: ${(endTime - startTime)/1000} 초 `);
