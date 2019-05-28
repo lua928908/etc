@@ -1,0 +1,40 @@
+* { -webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
+box-sizing: border-box; }
+ul,dl,ol { margin: 0; padding: 0; }
+li { list-style: none; }
+a { color: inherit; }
+
+.dms-view-wrap { position: relative; margin: 500px auto 0; width: 500px; height: 500px; border: 1px solid black; border-radius: 10px; overflow: hidden;
+	-webkit-transform: translate(0,-50%);
+	    -ms-transform: translate(0,-50%);
+	        transform: translate(0,-50%);
+}
+.dms-view-wrap .dms-view-inner { position: absolute; top: 50%; left: 0; height: 100%;
+	-webkit-transform: translate(0,-50%);
+	    -ms-transform: translate(0,-50%);
+	        transform: translate(0,-50%);
+}
+.dms-view-wrap .dms-view-inner:after { content: ""; display: block; clear: both; }
+.dms-view-wrap .dms-view-inner .dms-item { float: left; height: 100%; text-align: center; line-height: 500px; }
+
+/*화살표*/
+.dms-view-wrap .dms-prev { position: absolute; top: 50%; left: 15px; display: inline-block; width: 40px; height: 40px; background-color: #fff; border: 1px solid #000; border-radius: 50%; cursor: pointer; z-index: 10;
+	-webkit-transform: translate(0,-50%);
+	    -ms-transform: translate(0,-50%);
+	        transform: translate(0,-50%);
+}
+.dms-view-wrap .dms-next { position: absolute; top: 50%; right: 15px; display: inline-block; width: 40px; height: 40px; background-color: #fff; border: 1px solid #000; border-radius: 50%; cursor: pointer; z-index: 10;
+	-webkit-transform: translate(0,-50%);
+	    -ms-transform: translate(0,-50%);
+	        transform: translate(0,-50%);
+ }
+
+/*캐러셀*/
+.dms-view-wrap .carousel { position: absolute; bottom: 0; left: 50%; width: 100%; height: 30px; text-align: center; font-size: 0; background-color: black;
+	-webkit-transform: translate(-50%,0);
+	    -ms-transform: translate(-50%,0);
+	        transform: translate(-50%,0);
+}
+.dms-view-wrap .carousel .common { display: inline-block; margin: 8px 5px 0; width: 12px; height: 12px; background-color: #fff; border: 1px solid #000; border-radius: 50%; cursor: pointer; }
+.dms-view-wrap .carousel .common.active { background-color: greenyellow; }
